@@ -302,13 +302,12 @@ lazy val releaseSettings = Seq(
   Test / publishArtifact := false,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
+  credentials +=
+    Credentials(Path.userHome / "projects" / ".credentials"),
   publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value) {
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    } else {
-      Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    }
+    Some("snapshots" at
+    "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
+      withAllowInsecureProtocol true)
   },
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   pomExtra :=
@@ -359,7 +358,11 @@ lazy val releaseSettings = Seq(
 // Looks like some of release settings should be set for the root project as well.
 publishArtifact := false  // Don't release the root project
 publish / skip := true
-publishTo := Some("snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
+credentials +=
+  Credentials(Path.userHome / "projects" / ".credentials")
+publishTo := Some("snapshots" at
+  "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
+  withAllowInsecureProtocol true)
 releaseCrossBuild := false  // Don't use sbt-release's cross facility
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
