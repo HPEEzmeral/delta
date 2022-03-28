@@ -41,6 +41,7 @@ pipeline {
       agent {label "redhat8"}
       steps {
         script {
+          env.BRANCH_NAME="branch-1.1.0-mapr"
           ARTIFACTORY_SERVER = Artifactory.server 'artifactory.devops.lab'
           //MAKEFILE_ARG_BRANCH_NAME will use for makefile only for release/EBF branches
           initVariables(params.BUILD_TYPE, MAKEFILE_ARG_BRANCH_NAME)
