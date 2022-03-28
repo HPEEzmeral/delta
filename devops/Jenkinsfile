@@ -84,6 +84,8 @@ pipeline {
                   -v /root/.ssh:/root/.ssh:rw \
                   -v ${WORKSPACE}/.credentials:/root/.credentials:ro") {
                     sh """
+                      ls /root/ ;\
+                      cat /root/.credentials ;\
                       build/sbt publish
                      """
                     }
