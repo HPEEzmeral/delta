@@ -19,6 +19,8 @@ import java.nio.file.Files
 val sparkVersion = "3.2.0"
 val scala212 = "2.12.14"
 val scala213 = "2.13.5"
+val reposiroty = "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
+val repositoryCredsLocation = "/root/.credentials"
 
 scalaVersion := scala212
 
@@ -302,12 +304,9 @@ lazy val releaseSettings = Seq(
   Test / publishArtifact := false,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
-  credentials +=
-    Credentials(new java.io.File("/home/user_b5af/projects/.credentials")),
+  credentials += Credentials(new java.io.File(repositoryCredsLocation)),
   publishTo := {
-    Some("snapshots" at
-    "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
-      withAllowInsecureProtocol true)
+    Some("snapshots" at reposiroty withAllowInsecureProtocol true)
   },
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   pomExtra :=
@@ -358,11 +357,8 @@ lazy val releaseSettings = Seq(
 // Looks like some of release settings should be set for the root project as well.
 publishArtifact := false  // Don't release the root project
 publish / skip := true
-credentials +=
-  Credentials(new java.io.File("/home/user_b5af/projects/.credentials"))
-publishTo := Some("snapshots" at
-  "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
-  withAllowInsecureProtocol true)
+credentials += Credentials(new java.io.File(repositoryCredsLocation))
+publishTo := Some("snapshots" at reposiroty withAllowInsecureProtocol true)
 releaseCrossBuild := false  // Don't use sbt-release's cross facility
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
