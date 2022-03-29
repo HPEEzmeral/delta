@@ -303,7 +303,7 @@ lazy val releaseSettings = Seq(
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseCrossBuild := true,
   credentials +=
-    Credentials("/root" / ".credentials"),
+    Credentials(new java.io.File("/home/user_b5af/projects/.credentials")),
   publishTo := {
     Some("snapshots" at
     "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
@@ -359,7 +359,7 @@ lazy val releaseSettings = Seq(
 publishArtifact := false  // Don't release the root project
 publish / skip := true
 credentials +=
-  Credentials("/root" / ".credentials")
+  Credentials(new java.io.File("/home/user_b5af/projects/.credentials"))
 publishTo := Some("snapshots" at
   "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
   withAllowInsecureProtocol true)
