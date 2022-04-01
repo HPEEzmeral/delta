@@ -17,24 +17,21 @@
 package org.apache.spark.sql.delta.files
 
 // scalastyle:off import.ordering.noEmptyLine
-import java.net.URI
-import java.util.UUID
-
-import scala.collection.mutable.ArrayBuffer
-import scala.util.Random
-
-import org.apache.spark.sql.delta.actions.{AddFile, FileAction}
-import org.apache.spark.sql.delta.util.{DateFormatter, PartitionUtils, TimestampFormatter}
 import org.apache.hadoop.fs.{FileStatus, Path}
 import org.apache.hadoop.mapreduce.{JobContext, TaskAttemptContext}
-
+import org.apache.parquet.avro.AvroParquetReader
 import org.apache.spark.internal.Logging
 import org.apache.spark.internal.io.FileCommitProtocol
 import org.apache.spark.internal.io.FileCommitProtocol.TaskCommitMessage
 import org.apache.spark.sql.catalyst.expressions.Cast
-import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.delta.actions.{AddFile, FileAction}
+import org.apache.spark.sql.delta.util.{DateFormatter, PartitionUtils, TimestampFormatter, ZOrderingUtils}
 import org.apache.spark.sql.types.StringType
 
+import java.net.URI
+import java.util.UUID
+import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
 /**
  * Writes out the files to `path` and returns a list of them in `addedStatuses`.
  */
@@ -136,10 +133,19 @@ class DelayedCommitProtocol(
   }
 
   protected def buildActionFromAddedFile(
-      f: (Map[String, String], String),
-      stat: FileStatus,
-      taskContext: TaskAttemptContext): FileAction = {
-    AddFile(f._2, f._1, stat.getLen, stat.getModificationTime, true)
+                                          f: (Map[String, String], String),
+                                          stat: FileStatus,
+                                          taskContext: TaskAttemptContext): FileAction = {
+    val parquetFilePath = new Path(ZOrderingUtils.getBasePath + f._2)
+    if (ZOrderingUtils.getIsZOrdering) {
+      ZOrderingUtils.disableZOrdering()
+      val sortedCol = ParquetReader.readParquet(parquetFilePath)
+      val columnName = ParquetReader.getColumnName
+      val stats = "{\"numRecords\":" + sortedCol.length +
+        ",\"minValues\":{\"key\":" + columnName + ",\"value\":" + sortedCol.head +
+        ",\"maxValues\":{\"key\":" + columnName + ",\"value\":" + sortedCol.last + "}}"
+      AddFile(f._2, f._1, stat.getLen, stat.getModificationTime, true, stats)
+    } else AddFile(f._2, f._1, stat.getLen, stat.getModificationTime, true)
   }
 
   override def commitTask(taskContext: TaskAttemptContext): TaskCommitMessage = {
