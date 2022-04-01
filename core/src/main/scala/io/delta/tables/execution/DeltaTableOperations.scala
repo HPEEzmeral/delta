@@ -18,10 +18,10 @@ package io.delta.tables.execution
 
 import scala.collection.Map
 import org.apache.spark.sql.delta.{DeltaErrors, DeltaHistoryManager, DeltaLog, PreprocessTableUpdate}
-import org.apache.spark.sql.delta.commands.{DeleteCommand, DeltaGenerateCommand, OptimizeCommand, VacuumCommand}
+import org.apache.spark.sql.delta.commands.{DeleteCommand, DeltaGenerateCommand, OptimizeCommand, VacuumCommand, ZOrderingCommand}
 import org.apache.spark.sql.delta.util.AnalysisHelper
 import io.delta.tables.DeltaTable
-import org.apache.spark.sql.{Column, DataFrame, Dataset, functions}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, SparkSession, functions}
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.analysis.UnresolvedAttribute
 import org.apache.spark.sql.catalyst.expressions.{Expression, SubqueryExpression}
@@ -77,6 +77,23 @@ trait DeltaTableOperations extends AnalysisHelper { self: DeltaTable =>
                                  deltaLog: DeltaLog,
                                  tableId: Option[TableIdentifier] = None): DataFrame = {
     OptimizeCommand.optimize(sparkSession, deltaLog)
+    sparkSession.emptyDataFrame
+  }
+
+  protected def executeOptimizeWithPartitionsNumber(
+                                                     deltaLog: DeltaLog,
+                                                     tableId: Option[TableIdentifier] = None,
+                                                     partitions: Int): DataFrame = {
+    OptimizeCommand.optimize(sparkSession, deltaLog, partitions)
+    sparkSession.emptyDataFrame
+  }
+
+
+  protected def executeZOrdering(
+                                 deltaLog: DeltaLog,
+                                 tableId: Option[TableIdentifier] = None,
+                                 column: String): DataFrame = {
+    ZOrderingCommand.zOrdering(sparkSession, deltaLog, column)
     sparkSession.emptyDataFrame
   }
 

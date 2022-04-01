@@ -16,8 +16,8 @@
 
 package org.apache.spark.sql.delta.commands
 
+import org.apache.spark.sql.{Encoders, SparkSession}
 import org.apache.spark.sql.delta.DeltaLog
-import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object OptimizeCommand extends VacuumCommandImpl with Serializable {
 
@@ -34,6 +34,26 @@ object OptimizeCommand extends VacuumCommandImpl with Serializable {
       .format("delta")
       .load(basePath)
       .repartition(10)
+      .write
+      .format("delta")
+      .mode("overwrite")
+      .save(basePath)
+  }
+
+  def optimize(
+                spark: SparkSession,
+                deltaLog: DeltaLog,
+                partitions: Int): Unit = {
+    val path = deltaLog.dataPath
+    val deltaHadoopConf = deltaLog.newDeltaHadoopConf()
+    val fs = path.getFileSystem(deltaHadoopConf)
+    val basePath = fs.makeQualified(path).toString
+
+    spark
+      .read
+      .format("delta")
+      .load(basePath)
+      .repartition(partitions)
       .write
       .format("delta")
       .mode("overwrite")
