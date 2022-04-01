@@ -103,6 +103,14 @@ class DeltaTable private[tables](
     executeOptimize(deltaLog, table.getTableIdentifierIfExists)
   }
 
+  def optimize(partitions: Int): DataFrame = {
+    executeOptimizeWithPartitionsNumber(deltaLog, table.getTableIdentifierIfExists, partitions)
+  }
+
+  def zOrdering(column: String, columns: String*): DataFrame = {
+    executeZOrdering(deltaLog, table.getTableIdentifierIfExists, column)
+  }
+
   /**
    * Recursively delete files and directories in the table that are not needed by the table for
    * maintaining older versions up to the given retention threshold. This method will return an

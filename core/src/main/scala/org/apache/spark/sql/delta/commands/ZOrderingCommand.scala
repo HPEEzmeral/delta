@@ -16,14 +16,15 @@
 
 package org.apache.spark.sql.delta.commands
 
-import org.apache.spark.sql.{Encoders, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.delta.DeltaLog
 
-object OptimizeCommand extends VacuumCommandImpl with Serializable {
+object ZOrderingCommand extends VacuumCommandImpl with Serializable {
 
-  def optimize(
-                spark: SparkSession,
-                deltaLog: DeltaLog): Unit = {
+  def zOrdering(
+           spark: SparkSession,
+           deltaLog: DeltaLog,
+           column: String): Unit = {
     val path = deltaLog.dataPath
     val deltaHadoopConf = deltaLog.newDeltaHadoopConf()
     val fs = path.getFileSystem(deltaHadoopConf)
@@ -33,34 +34,11 @@ object OptimizeCommand extends VacuumCommandImpl with Serializable {
       .read
       .format("delta")
       .load(basePath)
-      .repartition(10)
+      .repartition(deltaLog.snapshot.numOfFiles.toInt)
+      .sortWithinPartitions(column)
       .write
       .format("delta")
       .mode("overwrite")
       .save(basePath)
   }
-
-  def optimize(
-                spark: SparkSession,
-                deltaLog: DeltaLog,
-                partitions: Int): Unit = {
-    val path = deltaLog.dataPath
-    val deltaHadoopConf = deltaLog.newDeltaHadoopConf()
-    val fs = path.getFileSystem(deltaHadoopConf)
-    val basePath = fs.makeQualified(path).toString
-
-    spark
-      .read
-      .format("delta")
-      .load(basePath)
-      .repartition(partitions)
-      .write
-      .format("delta")
-      .mode("overwrite")
-      .save(basePath)
-  }
-}
-
-class OptimizeCommandImpl extends DeltaCommand {
-
 }
