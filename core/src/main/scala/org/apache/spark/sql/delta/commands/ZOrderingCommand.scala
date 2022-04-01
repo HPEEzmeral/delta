@@ -18,6 +18,8 @@ package org.apache.spark.sql.delta.commands
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.delta.DeltaLog
+import org.apache.spark.sql.delta.files.ParquetReader
+import org.apache.spark.sql.delta.util.ZOrderingUtils
 
 object ZOrderingCommand extends VacuumCommandImpl with Serializable {
 
@@ -29,6 +31,10 @@ object ZOrderingCommand extends VacuumCommandImpl with Serializable {
     val deltaHadoopConf = deltaLog.newDeltaHadoopConf()
     val fs = path.getFileSystem(deltaHadoopConf)
     val basePath = fs.makeQualified(path).toString
+
+    ZOrderingUtils.enableZOrdering()
+    ZOrderingUtils.setBasePath(basePath)
+    ParquetReader.setColumnName(columnName = column)
 
     spark
       .read
