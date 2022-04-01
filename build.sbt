@@ -50,6 +50,8 @@ lazy val core = (project in file("core"))
       "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
       "org.apache.spark" %% "spark-catalyst" % sparkVersion % "provided",
 
+      "org.apache.parquet" % "parquet-avro" % "1.12.1" % "provided",
+      
       // spark-sql 3.2.0's parquet-hadoop 1.12.1 dependency no longer includes org.codehaus.jackson
       // as a dependency, so we include it here instead.
       "org.codehaus.jackson" % "jackson-core-asl" % "1.9.13",
