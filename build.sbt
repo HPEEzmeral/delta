@@ -16,10 +16,12 @@
 
 import java.nio.file.Files
 
-val sparkVersion = "3.2.0"
+val sparkVersion = "3.2.0.0-eep-810"
 val scala212 = "2.12.14"
 val scala213 = "2.13.5"
-val reposiroty = "http://df-mvn-dev.mip.storage.hpecorp.net/nexus/content/repositories/snapshots/"
+val repository =
+  sys.env
+    .getOrElse("MAPR_MAVEN_REPO", "https://repository.mapr.com/nexus/content/groups/mapr-public/")
 val repositoryCredsLocation = "/root/.credentials"
 
 scalaVersion := scala212
@@ -37,6 +39,7 @@ lazy val commonSettings = Seq(
 lazy val core = (project in file("core"))
   .enablePlugins(GenJavadocPlugin, JavaUnidocPlugin, ScalaUnidocPlugin, Antlr4Plugin)
   .settings (
+    resolvers += "HPE Maven Repo" at repository withAllowInsecureProtocol true,
     name := "delta-core",
     commonSettings,
     scalaStyleSettings,
@@ -308,7 +311,7 @@ lazy val releaseSettings = Seq(
   releaseCrossBuild := true,
   credentials += Credentials(new java.io.File(repositoryCredsLocation)),
   publishTo := {
-    Some("snapshots" at reposiroty withAllowInsecureProtocol true)
+    Some("snapshots" at repository withAllowInsecureProtocol true)
   },
   licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0")),
   pomExtra :=
@@ -360,7 +363,7 @@ lazy val releaseSettings = Seq(
 publishArtifact := false  // Don't release the root project
 publish / skip := true
 credentials += Credentials(new java.io.File(repositoryCredsLocation))
-publishTo := Some("snapshots" at reposiroty withAllowInsecureProtocol true)
+publishTo := Some("snapshots" at repository withAllowInsecureProtocol true)
 releaseCrossBuild := false  // Don't use sbt-release's cross facility
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
