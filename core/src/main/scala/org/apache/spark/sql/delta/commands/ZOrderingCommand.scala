@@ -20,6 +20,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.delta.DeltaLog
 import org.apache.spark.sql.delta.files.ParquetReader
 import org.apache.spark.sql.delta.util.ZOrderingUtils
+import org.apache.spark.sql.functions.col
 
 object ZOrderingCommand extends VacuumCommandImpl with Serializable {
 
@@ -40,11 +41,13 @@ object ZOrderingCommand extends VacuumCommandImpl with Serializable {
       .read
       .format("delta")
       .load(basePath)
-      .repartition(deltaLog.snapshot.numOfFiles.toInt)
-      .sortWithinPartitions(column)
+      .orderBy(column)
+      .repartitionByRange(deltaLog.snapshot.numOfFiles.toInt, col(column))
       .write
       .format("delta")
       .mode("overwrite")
       .save(basePath)
+
+    ZOrderingUtils.disableZOrdering()
   }
 }

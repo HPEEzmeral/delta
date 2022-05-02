@@ -138,7 +138,6 @@ class DelayedCommitProtocol(
                                           taskContext: TaskAttemptContext): FileAction = {
     val parquetFilePath = new Path(ZOrderingUtils.getBasePath + f._2)
     if (ZOrderingUtils.getIsZOrdering) {
-      ZOrderingUtils.disableZOrdering()
       val sortedCol = ParquetReader.readParquet(parquetFilePath)
       val columnName = ParquetReader.getColumnName
       val stats = "{\"numRecords\":" + sortedCol.length +
