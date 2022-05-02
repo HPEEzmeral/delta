@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import sbt.internal.bsp.BuildTargetTag.library
+
 import java.nio.file.Files
 
 val sparkVersion = "3.2.0.0-eep-810"
@@ -37,7 +39,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val core = (project in file("core"))
-  .enablePlugins(GenJavadocPlugin, JavaUnidocPlugin, ScalaUnidocPlugin, Antlr4Plugin)
+  .enablePlugins(GenJavadocPlugin, JavaUnidocPlugin, ScalaUnidocPlugin, Antlr4Plugin, AssemblyPlugin)
   .settings (
     resolvers += "HPE Maven Repo" at repository withAllowInsecureProtocol true,
     name := "delta-core",
@@ -53,7 +55,12 @@ lazy val core = (project in file("core"))
       "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
       "org.apache.spark" %% "spark-catalyst" % sparkVersion % "provided",
 
-      "org.apache.parquet" % "parquet-avro" % "1.12.1" % "provided",
+      "org.apache.parquet" % "parquet-avro" % "1.12.1" excludeAll(
+        ExclusionRule(organization = "org.apache.parquet"),
+        ExclusionRule(organization = "javax.annotation"),
+        ExclusionRule(organization = "com.fasterxml.jackson.core"),
+        ExclusionRule(organization = "org.slf4j")
+      ),
       
       // spark-sql 3.2.0's parquet-hadoop 1.12.1 dependency no longer includes org.codehaus.jackson
       // as a dependency, so we include it here instead.
@@ -131,6 +138,10 @@ lazy val contribs = (project in file("contribs"))
     commonSettings,
     scalaStyleSettings,
     releaseSettings,
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case x => MergeStrategy.first
+    },
     Compile / packageBin / mappings := (Compile / packageBin / mappings).value ++
       listPythonFiles(baseDirectory.value.getParentFile / "python"),
 
