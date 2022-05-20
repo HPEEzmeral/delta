@@ -107,8 +107,12 @@ class DeltaTable private[tables](
     executeOptimizeWithPartitionsNumber(deltaLog, table.getTableIdentifierIfExists, partitions)
   }
 
-  def zOrdering(column: String, columns: String*): DataFrame = {
+  def zOrdering(column: String): DataFrame = {
     executeZOrdering(deltaLog, table.getTableIdentifierIfExists, column)
+  }
+
+  def query(sqlText: String): DataFrame = {
+    executeQuery(deltaLog, table.getTableIdentifierIfExists, sqlText)
   }
 
   /**

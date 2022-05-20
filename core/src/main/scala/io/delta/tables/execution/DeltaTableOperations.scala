@@ -18,7 +18,7 @@ package io.delta.tables.execution
 
 import scala.collection.Map
 import org.apache.spark.sql.delta.{DeltaErrors, DeltaHistoryManager, DeltaLog, PreprocessTableUpdate}
-import org.apache.spark.sql.delta.commands.{DeleteCommand, DeltaGenerateCommand, OptimizeCommand, VacuumCommand, ZOrderingCommand}
+import org.apache.spark.sql.delta.commands.{DeleteCommand, DeltaGenerateCommand, OptimizeCommand, QueryCommand, VacuumCommand, ZOrderingCommand}
 import org.apache.spark.sql.delta.util.AnalysisHelper
 import io.delta.tables.DeltaTable
 import org.apache.spark.sql.{Column, DataFrame, Dataset, SparkSession, functions}
@@ -94,6 +94,14 @@ trait DeltaTableOperations extends AnalysisHelper { self: DeltaTable =>
                                  tableId: Option[TableIdentifier] = None,
                                  column: String): DataFrame = {
     ZOrderingCommand.zOrdering(sparkSession, deltaLog, column)
+    sparkSession.emptyDataFrame
+  }
+
+  protected def executeQuery(
+                                  deltaLog: DeltaLog,
+                                  tableId: Option[TableIdentifier] = None,
+                                  sqlText: String): DataFrame = {
+    QueryCommand.query(sparkSession, deltaLog, sqlText)
     sparkSession.emptyDataFrame
   }
 
