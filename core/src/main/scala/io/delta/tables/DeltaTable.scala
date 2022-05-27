@@ -107,10 +107,17 @@ class DeltaTable private[tables](
     executeOptimizeWithPartitionsNumber(deltaLog, table.getTableIdentifierIfExists, partitions)
   }
 
-  def zOrdering(column: String, columns: String*): DataFrame = {
+  def zOrdering(column: String): DataFrame = {
     executeZOrdering(deltaLog, table.getTableIdentifierIfExists, column)
   }
 
+  def sparkQuery(sqlText: String): DataFrame = {
+    executeSparkQuery(deltaLog, table.getTableIdentifierIfExists, sqlText)
+  }
+
+  def sqlQuery(sqlText: String): DataFrame = {
+    executeSqlQuery(deltaLog, table.getTableIdentifierIfExists, sqlText)
+  }
   /**
    * Recursively delete files and directories in the table that are not needed by the table for
    * maintaining older versions up to the given retention threshold. This method will return an

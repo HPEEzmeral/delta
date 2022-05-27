@@ -141,8 +141,9 @@ class DelayedCommitProtocol(
       val sortedCol = ParquetReader.readParquet(parquetFilePath)
       val columnName = ParquetReader.getColumnName
       val stats = "{\"numRecords\":" + sortedCol.length +
-        ",\"minValues\":{\"key\":" + columnName + ",\"value\":" + sortedCol.head +
-        ",\"maxValues\":{\"key\":" + columnName + ",\"value\":" + sortedCol.last + "}}"
+        ",\"minValues\":{\"key\":" + "\"" + columnName + "\"" + ",\"value\":" + sortedCol.head +
+        "},\"maxValues\":{\"key\":" + "\"" + columnName + "\"" + ",\"value\":" + sortedCol.last +
+        "}}"
       AddFile(f._2, f._1, stat.getLen, stat.getModificationTime, true, stats)
     } else AddFile(f._2, f._1, stat.getLen, stat.getModificationTime, true)
   }
