@@ -97,11 +97,19 @@ trait DeltaTableOperations extends AnalysisHelper { self: DeltaTable =>
     sparkSession.emptyDataFrame
   }
 
-  protected def executeQuery(
+  protected def executeSparkQuery(
                                   deltaLog: DeltaLog,
                                   tableId: Option[TableIdentifier] = None,
                                   sqlText: String): DataFrame = {
-    QueryCommand.query(sparkSession, deltaLog, sqlText)
+    QueryCommand.sparkQuery(sparkSession, deltaLog, sqlText)
+    sparkSession.emptyDataFrame
+  }
+
+  protected def executeSqlQuery(
+                              deltaLog: DeltaLog,
+                              tableId: Option[TableIdentifier] = None,
+                              sqlText: String): DataFrame = {
+    QueryCommand.sqlQuery(sparkSession, deltaLog, sqlText)
     sparkSession.emptyDataFrame
   }
 
